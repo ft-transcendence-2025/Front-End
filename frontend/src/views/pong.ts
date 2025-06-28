@@ -1,5 +1,5 @@
-import { navigateTo } from "../router/router.js";
-import { loadHtml } from "../utils/htmlLoader.js";
+import { navigateTo } from "../router/router.ts";
+import { loadHtml } from "../utils/htmlLoader.ts";
 
 export async function renderPong(container: HTMLElement | null) {
   if (!container) return;

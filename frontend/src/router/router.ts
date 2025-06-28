@@ -1,4 +1,4 @@
-import { routes } from "./routes.js";
+import { routes } from "./routes.ts";
 
 export async function router(container: HTMLElement | null) {
   const potentialMatch = routes.map((route) => {

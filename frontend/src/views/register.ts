@@ -1,6 +1,6 @@
-import { loadHtml } from "../utils/htmlLoader.js";
-import { register } from "../services/userService.js";
-import { navigateTo } from "../router/router.js";
+import { loadHtml } from "../utils/htmlLoader.ts";
+import { navigateTo } from "../router/router.ts";
+import { authService } from "../services/auth.service.ts";
 
 export async function renderRegister(container: HTMLElement | null) {
   if (!container) return;
@@ -19,7 +19,7 @@ export async function renderRegister(container: HTMLElement | null) {
     console.log(data); // debug
 
     try {
-      await register(data);
+      await authService.register(data);
       alert("Registration Successful!"); // debug
 
       // redirect to login

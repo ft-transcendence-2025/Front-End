@@ -1,6 +1,7 @@
-import { loadHtml } from "../utils/htmlLoader.js";
-import { login } from "../services/userService.js";
-import { navigateTo } from "../router/router.js";
+import { loadHtml } from "../utils/htmlLoader.ts";
+// import { login } from "../services/userService.ts";
+import { navigateTo } from "../router/router.ts";
+import { authService } from "../services/auth.service.ts";
 
 // This function will find the modal on the page and open it.
 export async function openLoginModal() {
@@ -23,7 +24,7 @@ export async function openLoginModal() {
     const data = Object.fromEntries(formData.entries());
 
     try {
-      const response = await login(data);
+      const response = await authService.login(data) as { token: string };
       localStorage.setItem("authToken", response.token);
       alert("Login Successful!");
       closeModal();

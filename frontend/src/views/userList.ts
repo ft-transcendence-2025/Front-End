@@ -1,5 +1,5 @@
-import { loadHtml } from "../utils/htmlLoader.js";
-import { getUsers } from "../services/userService.js";
+import { loadHtml } from "../utils/htmlLoader.ts";
+import { userService } from "../services/userService.ts";
 
 export async function renderUserList(container: HTMLElement | null) {
   if (!container) return;
@@ -9,7 +9,7 @@ export async function renderUserList(container: HTMLElement | null) {
 
   // Fetch users from the API
   try {
-    const userList = await getUsers();
+    const userList = await userService.getUsers();
 
     // Populate the user list in the container
     const userListContainer = container.querySelector(

@@ -1,5 +1,5 @@
-import { renderNavbar } from "./components/navbar.js";
-import { router, navigateTo } from "./router/router.js";
+import { renderNavbar } from "./components/navbar.ts";
+import { router, navigateTo } from "./router/router.ts";
 
 // set initial app layout
 const navbarElement = document.getElementById("navbar");

@@ -1,9 +1,9 @@
-import { renderHome } from "../views/home.js";
-import { openLoginModal } from "../components/loginModal.js";
-import { renderRegister } from "../views/register.js";
-import { renderUserList } from "../views/userList.js";
-import { renderDashboard } from "../views/dashboard.js";
-import { renderPong } from "../views/pong.js";
+import { renderHome } from "../views/home.ts";
+import { openLoginModal } from "../components/loginModal.ts";
+import { renderRegister } from "../views/register.ts";
+import { renderUserList } from "../views/userList.ts";
+import { renderDashboard } from "../views/dashboard.ts";
+import { renderPong } from "../views/pong.ts";
 
 interface Route {
   path: string;

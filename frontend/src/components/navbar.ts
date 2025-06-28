@@ -1,4 +1,4 @@
-import { loadHtml } from "../utils/htmlLoader.js";
+import { loadHtml } from "../utils/htmlLoader.ts";
 
 export async function renderNavbar(container: HTMLElement | null) {
   if (!container) return;
