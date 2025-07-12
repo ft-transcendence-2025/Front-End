@@ -10,8 +10,11 @@ export async function openLoginModal() {
     const modalHtml = await loadHtml("/html/loginModal.html");
     document.body.insertAdjacentHTML("beforeend", modalHtml);
   }
-
-  const modal = document.getElementById("login-modal")!;
+  const modal = document.getElementById("login-modal");
+  if (!modal) {
+    console.error("Login modal element not found.");
+    return;
+  }
   const form = modal.querySelector("form")!;
   const closeButton = modal.querySelector(
     ".close-button"
@@ -24,7 +27,7 @@ export async function openLoginModal() {
     const data = Object.fromEntries(formData.entries());
 
     try {
-      const response = await authService.login(data) as { token: string };
+      const response = (await authService.login(data)) as { token: string };
       localStorage.setItem("authToken", response.token);
       alert("Login Successful!");
       closeModal();
