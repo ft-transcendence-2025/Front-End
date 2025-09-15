@@ -68,6 +68,24 @@ async function enterGame(gameMode: string, gameData: FetchData | null) {
         const remoteGame = new RemoteGame(gameData);
       }
     }
+    else if (gameMode === "custom") {
+      // Handle custom game mode
+      const urlParams = new URLSearchParams(window.location.search);
+      const gameId = urlParams.get("id");
+      const side = urlParams.get("side");
+      
+      if (gameId && side) {
+        const customGameData: FetchData = {
+          state: "Created",
+          gameMode: "custom",
+          id: parseInt(gameId),
+          side: side
+        };
+        const remoteGame = new RemoteGame(customGameData);
+      } else {
+        console.error("Missing game ID or side for custom game");
+      }
+    }
     else {
       const response = await request(`${baseUrl}/api/getgame/singleplayer`, {
         credentials: "include"

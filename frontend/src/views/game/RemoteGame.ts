@@ -12,7 +12,7 @@ export class RemoteGame extends Game {
   constructor(data: FetchData) {
     super()
 
-    this.joinGame(`wss://${window.location.host}/ws/game/remote/${data.id}`);
+    this.joinGame(`wss://${window.location.host}/ws/game/${data.gameMode}/${data.id}`);
     this.side = data.side;
     this.canvas.addEventListener("keydown", this.handleKeyDown.bind(this));
   }

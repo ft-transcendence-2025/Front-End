@@ -1,3 +1,9 @@
+// Add global declaration for window.remoteGame
+declare global {
+  interface Window {
+    remoteGame?: any;
+  }
+}
 import {
   NotificationMessage,
   PrivateSendMessage,
@@ -37,6 +43,37 @@ class ChatComponent {
     this.messages = new Map();
   }
 
+  addCustomGameButtonToChat(chatContainer: HTMLElement, friend: Friend) {
+    const btn = document.createElement("button");
+    btn.textContent = "Create Custom Game";
+    btn.className = "bg-[var(--color-primary)] text-[var(--color-background)] px-2 py-1 rounded text-sm hover:bg-[var(--color-primary-dark)] focus:outline-none flex-shrink-0 ml-2";
+    btn.id = `custom-game-btn-${friend.username}`;
+    chatContainer.querySelector(".flex.gap-2")?.appendChild(btn);
+    btn.addEventListener("click", async () => {
+      try {
+        const api = await import("../utils/api.js");
+        const response = await api.request("https://localhost:5000/api/getgame/custom", { credentials: "include" }) as { state: string, gameMode: string, id: number };
+        
+        // Add game invite to notifications instead of chat
+        const { notificationService } = await import("../services/notifications.service.js");
+        const { getUserAvatar } = await import("../services/profileService.js");
+        const avatar = await getUserAvatar(this.currentUserId);
+        
+        notificationService.addGameInvite({
+          senderUsername: this.currentUserId,
+          avatar: avatar,
+          gameId: response.id,
+          gameMode: response.gameMode,
+          id: `game_${response.id}_${Date.now()}`
+        });
+
+        alert("Game invite sent! Check notifications.");
+      } catch (err) {
+        alert("Failed to create custom game: " + err);
+      }
+    });
+  }
+
   reset() {
     // Close all open chats
     this.openChats.forEach((chat, friendId) => {
@@ -68,24 +105,25 @@ class ChatComponent {
 
     if (messages) {
       messagesContainer.innerHTML = messages
-        .map(
-          (message) => `
-        <div class="mb-2 ${message.recipientId || message.senderId == this.currentUserId ? "text-right" : "text-left"}">
-          <div class="inline-block p-2 rounded-lg max-w-xs ${message.recipientId || message.senderId == this.currentUserId
-              ? "bg-[var(--color-primary)] text-[var(--color-background)] ml-auto"
-              : "bg-[var(--color-secondary-light)] text-[var(--color-text-primary)]"
-            }">
-            <div class="text-xs">${message.content}</div>
-            <div class="text-xs opacity-70 mt-1">
-              ${new Date(message.ts || message.createdAt).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+        .map((message) => {
+          // Regular message display (removed game invite special handling)
+          return `
+            <div class="mb-2 ${message.recipientId || message.senderId == this.currentUserId ? "text-right" : "text-left"}">
+              <div class="inline-block p-2 rounded-lg max-w-xs ${message.recipientId || message.senderId == this.currentUserId
+                  ? "bg-[var(--color-primary)] text-[var(--color-background)] ml-auto"
+                  : "bg-[var(--color-secondary-light)] text-[var(--color-text-primary)]"
+                }">
+                <div class="text-xs">${message.content}</div>
+                <div class="text-xs opacity-70 mt-1">
+                  ${new Date(message.ts || message.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      `
-        )
+          `;
+        })
         .join("");
 
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -174,9 +212,21 @@ class ChatComponent {
         <img id="friend-avatar" src="${friendAvatar.src}" class="w-8 h-8 object-cover cursor-pointer" onerror="this.onerror=null;this.src='assets/avatars/panda.png';"/>
         </span>
       </span>
-      <span class=" font-bold  ">${friend.username}</span>
-      <div class="flex gap-2">
+      <span class="font-bold">${friend.username}</span>
+      <div class="flex gap-2 items-center">
         <button class="close px-1 hover:bg-[var(--color-primary-darker)] rounded">x</button>
+        <div class="relative">
+        <button id="chat-options-btn-${friend.username}" class="px-2 py-1 rounded hover:bg-[var(--color-primary-darker)] focus:outline-none">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+          <circle cx="4" cy="10" r="2"/>
+          <circle cx="10" cy="10" r="2"/>
+          <circle cx="16" cy="10" r="2"/>
+          </svg>
+        </button>
+        <div id="chat-options-menu-${friend.username}" class="hidden absolute right-0 mt-2 w-40 bg-[var(--color-primary)] border rounded shadow-lg z-10">
+          <button id="custom-game-btn-${friend.username}" class="block w-full text-left px-4 py-2 hover:bg-[var(--color-primary-light)] text-sm">Send Custom Game Invite</button>
+        </div>
+        </div>
       </div>
       </div>
       <div class="flex-1 p-2 overflow-y-auto text-sm bg-[var(--color-background)]" id="messages">
@@ -190,6 +240,46 @@ class ChatComponent {
       </div>
       </div>
     `;
+
+    // Dropdown menu logic
+    const optionsBtn = chatContainer.querySelector(`#chat-options-btn-${friend.username}`) as HTMLButtonElement;
+    const optionsMenu = chatContainer.querySelector(`#chat-options-menu-${friend.username}`) as HTMLElement;
+    optionsBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      optionsMenu.classList.toggle("hidden");
+    });
+    document.addEventListener("click", () => {
+      optionsMenu.classList.add("hidden");
+    });
+    optionsMenu.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+
+    // Custom Game Button logic
+    const customGameBtn = chatContainer.querySelector(`#custom-game-btn-${friend.username}`) as HTMLButtonElement;
+    customGameBtn.addEventListener("click", async () => {
+      optionsMenu.classList.add("hidden");
+      try {
+      const api = await import("../utils/api.js");
+      const response = await api.request("https://localhost:5000/api/getgame/custom", { credentials: "include" }) as { state: string, gameMode: string, id: number };
+      const inviteMsg = {
+        kind: "private/send",
+        type: "TEXT",
+        recipientId: friend.username,
+        content: `[GAME INVITE] Join my custom game! Game ID: ${response.id}`,
+        ts: Date.now(),
+        gameInvite: {
+        gameMode: response.gameMode,
+        id: response.id,
+        side: "left"
+        }
+      };
+      this.sendMessage(friend.username, inviteMsg);
+      alert("Invite sent! Waiting for friend to join.");
+      } catch (err) {
+      alert("Failed to create custom game: " + err);
+      }
+    });
 
     // Example: Add event listener to the username span
     const friendAvatarImg = chatContainer.querySelector("#friend-avatar");
