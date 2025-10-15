@@ -139,7 +139,6 @@ function setButtons(container: HTMLElement, tournamentState: TournamentState) {
     updateProgressBar(container, 75, "Final Match in Progress");
   }
   if (tournamentState.match3.winner) {
-    console.log("[Tournament Tree] Match 3 winner detected:", tournamentState.match3.winner);
     // Disable buttom
     updateMatchStatus(container, 1, "completed");
     updateMatchStatus(container, 2, "completed");

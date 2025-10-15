@@ -3,6 +3,7 @@ import { Player } from "./Player.js";
 import { AI } from "./AI.js";
 import { navigateTo } from "../../router/router.js";
 import { Game } from "./Game.js";
+import { router } from "./../../router/router.js";
 
 export class LocalGame extends Game {
   private player1: Player | null = null;
@@ -10,11 +11,10 @@ export class LocalGame extends Game {
   private AI: AI | null = null;
   private updateAIIntervalId: number | null = null;
 
-  private winningPoint: number = 3;
-
   private gameMode: string;
   private gameLoopId: number | null = null;
-  private isGameActive: boolean = true;
+
+  private isGameOver: boolean = false;
 
   constructor(gameMode: string, id: number) {
     super()
@@ -131,7 +131,6 @@ export class LocalGame extends Game {
   }
 
   public stopGame(): void {
-    this.isGameActive = false;
     if (this.gameLoopId !== null) {
       cancelAnimationFrame(this.gameLoopId);
       this.gameLoopId = null;
@@ -143,15 +142,6 @@ export class LocalGame extends Game {
   }
 
   public gameLoop(): void {
-    // Stop game loop if game is no longer active
-    if (!this.isGameActive) {
-      if (this.gameLoopId !== null) {
-        cancelAnimationFrame(this.gameLoopId);
-        this.gameLoopId = null;
-      }
-      return;
-    }
-
     if (!this.gameState || !this.gameState.paddleLeft || !this.gameState.paddleRight) {
       this.gameLoopId = requestAnimationFrame(this.gameLoop.bind(this));
       return ;
@@ -161,17 +151,17 @@ export class LocalGame extends Game {
       this.renderBall();
       this.renderPaddle(this.gameState.paddleLeft);
       this.renderPaddle(this.gameState.paddleRight);
-      this.checkPoints(this.ws);
+      if (this.checkPoints(this.ws) === -1) {
+        this.isGameOver = true;
+        return ;
+      }
       this.checkIsGamePaused();
     }
     this.gameLoopId = requestAnimationFrame(this.gameLoop.bind(this));
   }
 
-  protected leaveGame(): void {
-    // Stop the game loop first
+  protected leaveGame() {
     this.stopGame();
-    
-    // Then call parent's leaveGame to handle WebSocket cleanup and navigation
     super.leaveGame();
   }
 
@@ -181,10 +171,13 @@ export class LocalGame extends Game {
     }
     if (["p", "P", " "].includes(event.key)) {
       event.preventDefault();
+    }
+    if (this.isGameOver) {
+      this.leaveGame();
+      return ;
+    }
+    else {
       this.sendPayLoad(event);
-      if (event.key === " " && this.gameState && this.gameState.score && this.gameState.score.winner) {
-        this.leaveGame();
-      }
     }
   }
 }

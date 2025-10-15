@@ -1,3 +1,4 @@
+import { router } from "./../../router/router.js";
 import { 
   GameState, Canvas, BallState, FetchData,
   PaddleState, PaddleSide, GameMode, SECOND, 
@@ -66,9 +67,9 @@ export class Game {
     }
   }
 
-  protected checkPoints(ws: WebSocket | null): void {
+  protected checkPoints(ws: WebSocket | null): number {
     if (!this.gameState || !this.gameState.score) {
-      return ;
+      return -1;
     }
 
     const player1ScoreElement = document.getElementById(`player1-score`) as HTMLSpanElement;
@@ -84,10 +85,12 @@ export class Game {
 
     if (this.gameState.score.winner) {
       this.gameOver(this.gameState.score.winner)
+      return -1;
     }
     else {
       this.hiddeGameOver();
     }
+    return 0;
   }
 
   protected gameOver(player: 1 | 2): void {
@@ -119,10 +122,6 @@ export class Game {
         }
       }
     }
-    // if (this.ws) {
-    //   this.ws.close();
-    //   this.ws = null;
-    // }
   }
 
   protected hiddeGameOver(): void {
@@ -144,10 +143,17 @@ export class Game {
       this.ws.send(JSON.stringify(payLoad));
       this.ballMoving = true;
     }
+    else {
+      this.redirect();
+    }
   }
 
+
   protected leaveGame() {
-    if (!this.ws) return ;
+    if (!this.ws) {
+      this.redirect();
+      return ;
+    }
 
     this.ws.send(JSON.stringify({
       type: "command",
@@ -155,6 +161,10 @@ export class Game {
     }));
     this.ws.close();
     this.ws = null;
+    this.redirect();
+  }
+
+  private redirect() {
     const mode = window.location.search.split("=")[1];
     if (mode !== "remote") {
       localStorage.removeItem("GameMode");

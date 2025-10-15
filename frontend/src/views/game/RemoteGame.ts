@@ -87,15 +87,6 @@ export class RemoteGame extends Game {
   }
 
   public gameLoop(): void {
-    // Stop game loop if game is no longer active
-    if (!this.isGameActive) {
-      if (this.gameLoopId !== null) {
-        cancelAnimationFrame(this.gameLoopId);
-        this.gameLoopId = null;
-      }
-      return;
-    }
-
     if (!this.gameState || !this.gameState.paddleLeft || !this.gameState.paddleRight) {
       this.gameLoopId = requestAnimationFrame(this.gameLoop.bind(this));
       return ;
