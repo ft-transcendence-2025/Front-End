@@ -69,7 +69,7 @@ export class Game {
 
   protected checkPoints(ws: WebSocket | null): number {
     if (!this.gameState || !this.gameState.score) {
-      return -1;
+      return 0;
     }
 
     const player1ScoreElement = document.getElementById(`player1-score`) as HTMLSpanElement;

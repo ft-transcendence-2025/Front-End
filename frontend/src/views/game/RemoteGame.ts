@@ -18,8 +18,8 @@ export class RemoteGame extends Game {
   private gameMode: string;
   private redir: boolean = false;
   private gameLoopId: number | null = null;
-  private isGameActive: boolean = true;
   private redirectPath: string = "/dashboard";
+  private isGameOver: boolean = false;
 
   constructor(gameMode: string, gameId: number, side: string) {
     super()
@@ -42,7 +42,6 @@ export class RemoteGame extends Game {
   }
 
   public stopGame(): void {
-    this.isGameActive = false;
     if (this.gameLoopId !== null) {
       cancelAnimationFrame(this.gameLoopId);
       this.gameLoopId = null;
@@ -96,23 +95,12 @@ export class RemoteGame extends Game {
     this.renderBall();
     this.renderPaddle(this.gameState.paddleLeft);
     this.renderPaddle(this.gameState.paddleRight);
-    this.checkPoints(this.ws);
+    if (this.checkPoints(this.ws) === -1) {
+      this.isGameOver = true;
+      return ;
+    }
     this.checkIsGamePaused();
     this.checkIsWaiting();
-    
-    // Check if game just ended and setup auto-redirect AFTER rendering victory screen
-    if (this.gameState.score && this.gameState.score.winner && !this.redir) {
-      this.redir = true;
-      this.stopGame();
-      
-      // Show game over screen for 5 seconds then auto-navigate
-      setTimeout(() => {
-        const container = document.getElementById("content");
-        navigateTo(this.redirectPath, container);
-      }, 5000);
-      return;
-    }
-    
     this.gameLoopId = requestAnimationFrame(this.gameLoop.bind(this));
   }
 
@@ -204,29 +192,17 @@ export class RemoteGame extends Game {
   }
 
   private async handleKeyDown(event: KeyboardEvent) {
-    if (!this.gameState)
-      return ;
-    
-    // If game is over, only allow space key for navigation after a delay
-    if (this.gameState.score && this.gameState.score.winner) {
-      event.preventDefault();
-      if (event.key === " " && !this.redir) {
-        this.redir = true;
-        
-        // Stop the game loop before navigating
-        this.stopGame();
-        
-        const container = document.getElementById("content");
-        navigateTo(this.redirectPath, container);
-      }
-      return; // Don't process any other keys when game is over
+    if (this.isGameOver) {
+      this.leaveGame();
+      return;
     }
-    
     if (["ArrowDown", "ArrowUp"].includes(event.key)) {
       event.preventDefault();
     }
     if (["p", "P", " "].includes(event.key)) {
       event.preventDefault();
+      if (!this.gameState)
+        return ;
       if (this.gameState.status !== "waiting for players") {
         this.sendPayLoad(event);
       }
@@ -234,10 +210,7 @@ export class RemoteGame extends Game {
   }
 
   protected leaveGame(): void {
-    // Stop the game loop first
     this.stopGame();
-    
-    // Then call parent's leaveGame to handle WebSocket cleanup and navigation
     super.leaveGame();
   }
 }
