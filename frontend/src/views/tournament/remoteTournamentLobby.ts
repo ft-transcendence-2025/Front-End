@@ -176,10 +176,8 @@ class TournamentLobby {
   private updateTournamentInfo(t: any) {
     const set = (id: string, content: string) => { const el = document.getElementById(id); if (el) el.innerHTML = content; };
     set('tournament-name', t.name);
-    set('player-count', `(${t.players.length}/${t.config.maxPlayers})`);
-    set('tournament-type', `<i class="fas ${t.config.isRanked ? 'fa-trophy' : 'fa-gamepad'} mr-2"></i>${t.config.maxPlayers}-Player Bracket`);
-    set('tournament-ranked', `<i class="fas fa-star mr-2"></i>${t.config.isRanked ? 'Yes' : 'No'}`);
-    set('tournament-spectators', `<i class="fas fa-eye mr-2"></i>${t.config.allowSpectators ? 'Allowed' : 'Not Allowed'}`);
+    set('player-count', `(${t.players.length}/4)`);
+    set('tournament-type', `<i class="fas fa-trophy mr-2"></i>4-Player Bracket`);
   }
 
   private async updatePlayers(tournament: TournamentState) {

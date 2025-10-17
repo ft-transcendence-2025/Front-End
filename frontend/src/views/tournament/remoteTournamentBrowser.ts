@@ -104,21 +104,17 @@ class TournamentBrowser {
 
     // Players
     const playersEl = card.querySelector('.tournament-players') as HTMLElement;
-    playersEl.textContent = `${tournament.players.length}/${tournament.config.maxPlayers}`;
+    playersEl.textContent = `${tournament.players.length}/4`;
 
     // Type
     const typeEl = card.querySelector('.tournament-type') as HTMLElement;
-    typeEl.textContent = `${tournament.config.maxPlayers}-Player`;
-
-    // Ranked
-    const rankedEl = card.querySelector('.tournament-ranked') as HTMLElement;
-    rankedEl.textContent = tournament.config.isRanked ? 'Yes' : 'No';
+    typeEl.textContent = `4-Player`;
 
     // Join button
     const joinBtn = card.querySelector('.tournament-join-btn') as HTMLButtonElement;
     
     // Disable join if tournament is full or already started
-    if (tournament.players.length >= tournament.config.maxPlayers || tournament.phase !== 'registration') {
+    if (tournament.players.length >= 4 || tournament.phase !== 'registration') {
       joinBtn.disabled = true;
       joinBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
       joinBtn.classList.add('bg-gray-600', 'cursor-not-allowed');
@@ -163,11 +159,8 @@ class TournamentBrowser {
 
   private async createTournament() {
     const nameInput = document.getElementById('tournament-name') as HTMLInputElement;
-    const maxPlayersInput = document.getElementById('tournament-max-players') as HTMLSelectElement;
-    const rankedInput = document.getElementById('tournament-ranked') as HTMLInputElement;
-    const spectatorsInput = document.getElementById('tournament-spectators') as HTMLInputElement;
 
-    if (!nameInput || !maxPlayersInput) return;
+    if (!nameInput) return;
 
     const name = nameInput.value.trim();
     if (!name) {
@@ -176,16 +169,10 @@ class TournamentBrowser {
     }
 
     try {
-      const config = {
-        maxPlayers: parseInt(maxPlayersInput.value),
-        isRanked: rankedInput?.checked || false,
-        allowSpectators: spectatorsInput?.checked || true,
-      };
-
-      console.log('[Browser] Creating tournament:', name, config);
+      console.log('[Browser] Creating tournament:', name);
 
       // Create tournament
-      const response = await remoteTournamentService.createTournament(name, config);
+      const response = await remoteTournamentService.createTournament(name);
 
       console.log('[Browser] Create tournament response:', response);
 

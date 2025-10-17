@@ -62,39 +62,9 @@
         />
       </div>
 
-      <!-- Max Players -->
-      <div>
-        <label class="mb-2 block text-sm font-medium text-gray-300">Max Players</label>
-        <select
-          id="tournament-max-players"
-          required
-          class="w-full rounded-lg border border-gray-600 bg-gray-700 px-4 py-2 text-white focus:border-blue-500 focus:outline-none"
-        >
-          <option value="4">4 Players</option>
-          <option value="8">8 Players</option>
-        </select>
-      </div>
-
-      <!-- Ranked -->
-      <div class="flex items-center">
-        <input
-          type="checkbox"
-          id="tournament-ranked"
-          class="h-4 w-4 rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-2 focus:ring-blue-500"
-        />
-        <label class="ml-2 text-sm font-medium text-gray-300">Ranked (affects player ratings)</label>
-      </div>
-
-      <!-- Allow Spectators -->
-      <div class="flex items-center">
-        <input
-          type="checkbox"
-          id="tournament-spectators"
-          checked
-          class="h-4 w-4 rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-2 focus:ring-blue-500"
-        />
-        <label class="ml-2 text-sm font-medium text-gray-300">Allow Spectators</label>
-      </div>
+      <p class="text-sm text-gray-400">
+        Remote tournaments use a fixed 4-player bracket with no spectator or ranked options.
+      </p>
 
       <!-- Buttons -->
       <div class="flex gap-4 pt-4">
@@ -136,10 +106,6 @@
       <div class="flex items-center justify-between text-gray-300">
         <span><i class="fas fa-trophy mr-2"></i>Type</span>
         <span class="tournament-type"></span>
-      </div>
-      <div class="flex items-center justify-between text-gray-300">
-        <span><i class="fas fa-star mr-2"></i>Ranked</span>
-        <span class="tournament-ranked"></span>
       </div>
     </div>
 

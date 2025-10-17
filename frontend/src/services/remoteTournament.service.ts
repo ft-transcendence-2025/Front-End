@@ -196,8 +196,7 @@ export class RemoteTournamentService {
    * Create a new tournament
    */
   public async createTournament(
-    name: string,
-    config?: Partial<TournamentConfig>
+    name: string
   ): Promise<{ success: boolean; tournament?: TournamentState; error?: string }> {
     try {
       const username = this.getCurrentUsername();
@@ -210,7 +209,6 @@ export class RemoteTournamentService {
         body: JSON.stringify({
           name,
           createdBy: username,
-          config,
         }),
       });
 
