@@ -1,6 +1,6 @@
 import { Subscription } from "rxjs";
 import { loadHtml } from "../../utils/htmlLoader.js";
-import { remoteTournamentService, TournamentPhase, TournamentPlayer, ChatMessage, TournamentState, MatchAssignmentPayload, MatchStatus } from "../../services/remoteTournament.service.js";
+import { remoteTournamentService, TournamentPhase, TournamentPlayer, ChatMessage, TournamentState, MatchAssignmentPayload, MatchStatus, SystemMessage } from "../../services/remoteTournament.service.js";
 import { navigateTo } from "../../router/router.js";
 import { toast } from "../../utils/toast.js";
 import { getUserAvatar } from "../../services/profileService.js";
@@ -151,6 +151,25 @@ class TournamentLobby {
       toast.error(e);
     });
     this.subscriptions.push(errorSub);
+
+    const systemSub = remoteTournamentService.systemMessages$.subscribe((msg: SystemMessage) => {
+      if (!msg) return;
+      if (msg.level === 'error') {
+        toast.error(msg.text);
+      } else if (msg.level === 'warning') {
+        toast.warning(msg.text);
+      } else {
+        toast.info(msg.text);
+      }
+
+      if (msg.redirectTo) {
+        this.destroy();
+        localStorage.removeItem('currentTournamentId');
+        localStorage.removeItem('remoteTournamentMatch');
+        navigateTo(msg.redirectTo, this.container);
+      }
+    });
+    this.subscriptions.push(systemSub);
 
     const matchSub = remoteTournamentService.matchAssignments$.subscribe((assignment: MatchAssignmentPayload) => {
       if (!assignment) return;

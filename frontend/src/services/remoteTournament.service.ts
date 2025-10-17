@@ -109,6 +109,12 @@ export interface MatchAssignmentPayload {
   } | null;
 }
 
+export interface SystemMessage {
+  level: 'info' | 'warning' | 'error';
+  text: string;
+  redirectTo?: string;
+}
+
 /**
  * Modern Reactive Tournament Service
  * Built with RxJS for reactive state management
@@ -130,6 +136,7 @@ export class RemoteTournamentService {
   private _chatMessages$ = new Subject<ChatMessage>();
   private _errors$ = new Subject<string>();
   private _matchAssignments$ = new Subject<MatchAssignmentPayload>();
+  private _systemMessages$ = new Subject<SystemMessage>();
   private destroy$ = new Subject<void>();
 
   // Public observables
@@ -138,6 +145,7 @@ export class RemoteTournamentService {
   public chatMessages$: Observable<ChatMessage> = this._chatMessages$.asObservable();
   public errors$: Observable<string> = this._errors$.asObservable();
   public matchAssignments$: Observable<MatchAssignmentPayload> = this._matchAssignments$.asObservable();
+  public systemMessages$: Observable<SystemMessage> = this._systemMessages$.asObservable();
   
   // Derived observables
   public players$: Observable<TournamentPlayer[]>;
@@ -407,6 +415,23 @@ export class RemoteTournamentService {
         this._chatMessages$.next(message.data);
         break;
 
+      case 'tournament:registration_timeout':
+        this._systemMessages$.next({
+          level: 'warning',
+          text: message.data?.message || 'Registration timeout reached. Waiting for more players.',
+        });
+        break;
+
+      case 'tournament:closed':
+        this._systemMessages$.next({
+          level: 'error',
+          text: message.data?.message || 'Tournament closed.',
+          redirectTo: message.data?.redirectTo,
+        });
+        this.disconnect();
+        this.resetState();
+        break;
+
       case 'error':
         console.error('[TournamentService] Error message:', message.message);
         this._errors$.next(message.message || 'Unknown error');
@@ -632,6 +657,7 @@ export class RemoteTournamentService {
     this._connectionStatus$.complete();
     this._chatMessages$.complete();
     this._errors$.complete();
+    this._systemMessages$.complete();
   }
 }
 
