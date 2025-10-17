@@ -476,11 +476,12 @@ export class RemoteTournamentService {
 
     this.currentPlayerState = currentPlayer;
 
-    const message: TournamentMessage = {
-      type: currentPlayer.isReady ? 'player:unready' : 'player:ready',
-    };
+    if (currentPlayer.isReady) {
+      console.debug('[TournamentService] Ready already confirmed; ignoring toggle');
+      return;
+    }
 
-    this.send(message);
+    this.send({ type: 'player:ready' });
   }
 
   /**

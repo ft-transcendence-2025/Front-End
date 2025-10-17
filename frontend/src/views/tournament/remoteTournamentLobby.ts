@@ -459,14 +459,12 @@ class TournamentLobby {
     }
     console.log('[Lobby] Current player ready status:', cp.isReady);
     if (cp.isReady) {
-      btn.innerHTML = '<i class="fas fa-times mr-2"></i> Not Ready';
-      btn.classList.remove('bg-primary');
-      btn.classList.add('bg-gray-600');
+      btn.innerHTML = '<i class="fas fa-check mr-2"></i> Ready';
+      btn.setAttribute('disabled', 'true');
       txt.textContent = 'You are ready! Waiting for others...';
     } else {
       btn.innerHTML = '<i class="fas fa-check mr-2"></i> Ready';
-      btn.classList.add('bg-primary');
-      btn.classList.remove('bg-gray-600');
+      btn.removeAttribute('disabled');
       txt.textContent = "Click ready when you're prepared to start";
     }
   }
